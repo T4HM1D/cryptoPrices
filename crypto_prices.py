@@ -22,19 +22,17 @@ def get_crypto_data(crypto_list, currency_list):
     headers = {
         'x-cg-demo-api-key': api_key
     }
-    crypto_data = {}
-    for crypto in crypto_list:
-        print(f'getting data for {crypto}')
-        response = requests.get(url, headers=headers, params={'ids': crypto, 'vs_currencies': ','.join(currency_list)})
-        if response.status_code == 200:
-            print(f'Successfully fetched data for {crypto}')
-            crypto_data[crypto] = response.json()[crypto]
-        else:
-            print(f'Error fetching data for {crypto}: {response.status_code}')
-    return crypto_data
+    crypto_str = ','.join(crypto_list)
+    currency_str = ','.join(currency_list)
+    print(f'Getting data for {crypto_str}')
+    response = requests.get(url, headers=headers, params={'ids': crypto_str, 'vs_currencies': currency_str})
+    return response.json()
 
 
 def create_csv(crypto_data):
+    """
+    Creates dataframe from the crypto data for each coin, then export it a csv file.
+    """
     dataframes = {}
     for coin, prices in crypto_data.items():
         df = pd.DataFrame(prices.items(), columns=['currency', 'price'])
@@ -51,7 +49,8 @@ def get_and_create_coin_price_csv(crypto_list, currency_list):
     create_csv(crypto_data)
 
 
-crypto_list = ['bitcoin', 'ethereum', 'solana']
-currency_list = ['gbp', 'usd', 'eur']
-
-print(get_and_create_coin_price_csv(crypto_list, currency_list))
+if __name__ == '__main__':
+    crypto_list = ['bitcoin', 'ethereum', 'solana']
+    currency_list = ['gbp', 'usd', 'eur']
+    
+    get_and_create_coin_price_csv(crypto_list, currency_list)
