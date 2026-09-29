@@ -47,10 +47,56 @@ def create_csv(crypto_data):
 def get_and_create_coin_price_csv(crypto_list, currency_list):
     crypto_data = get_crypto_data(crypto_list, currency_list)
     create_csv(crypto_data)
+    return crypto_data
+
+
+def read_csv(coins):
+    dfs = {}
+    for coin in coins:
+        try:
+            df = pd.read_csv(f'{coin}.csv')
+            dfs[coin] = df
+        except:
+            print(f'{coin}.csv not found')
+    return dfs
+
+def merge_data(dataframes):
+    formatted_dfs = []  
+    for coin, df in dataframes.items():
+        formatted_dfs.append(df.rename(columns={'price': coin}))
+
+    dfs = [df.set_index('currency') for df in formatted_dfs]
+    merged_dfs = pd.concat(dfs, axis = 1)
+    return merged_dfs
+
+def get_highest_and_lowest_coins(df, currency):
+    row = df.loc[currency]
+
+    highest_price = row.max()
+    highest_coin = row.idxmax()
+
+    lowest_price = row.min()
+    lowest_coin = row.idxmin()
+
+    return {'currency': currency,
+            'highest': {'coin': highest_coin, 'price': float(highest_price)},
+            'lowest': {'coin': lowest_coin, 'price': float(lowest_price)}
+            }
+
+def cal_avg_price(df, currency):
+    row = df.loc[currency]
+    avg_price = row.mean()
+    return {f'average price in {currency}': float(avg_price)}
 
 
 if __name__ == '__main__':
     crypto_list = ['bitcoin', 'ethereum', 'solana']
     currency_list = ['gbp', 'usd', 'eur']
     
-    get_and_create_coin_price_csv(crypto_list, currency_list)
+    print(get_and_create_coin_price_csv(crypto_list, currency_list))
+
+    dfs = read_csv(crypto_list)
+    merged_df = merge_data(dfs)
+
+    print(get_highest_and_lowest_coins(merged_df, 'gbp'))
+    print(cal_avg_price(merged_df, 'gbp'))
