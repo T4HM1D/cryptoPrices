@@ -54,6 +54,7 @@ def read_csv(coins):
     dfs = {}
     for coin in coins:
         try:
+            print(f'Reading {coin}.csv...')
             df = pd.read_csv(f'{coin}.csv')
             dfs[coin] = df
         except:
@@ -62,11 +63,13 @@ def read_csv(coins):
 
 def merge_data(dataframes):
     formatted_dfs = []  
+    print('Merging Dataframes...')
     for coin, df in dataframes.items():
         formatted_dfs.append(df.rename(columns={'price': coin}))
 
     dfs = [df.set_index('currency') for df in formatted_dfs]
     merged_dfs = pd.concat(dfs, axis = 1)
+    print('Merged Dataframe successful')
     return merged_dfs
 
 def get_highest_and_lowest_coins(df, currency):
@@ -77,7 +80,7 @@ def get_highest_and_lowest_coins(df, currency):
 
     lowest_price = row.min()
     lowest_coin = row.idxmin()
-
+    print(f'Calculating highest and lowest priced coin in {currency}:')
     return {'currency': currency,
             'highest': {'coin': highest_coin, 'price': float(highest_price)},
             'lowest': {'coin': lowest_coin, 'price': float(lowest_price)}
@@ -86,6 +89,7 @@ def get_highest_and_lowest_coins(df, currency):
 def cal_avg_price(df, currency):
     row = df.loc[currency]
     avg_price = row.mean()
+    print(f'Calculating average {currency} price accross all coins:')
     return {f'average price in {currency}': float(avg_price)}
 
 
